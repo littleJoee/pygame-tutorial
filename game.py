@@ -22,7 +22,7 @@ class Game:
         self.assets = {
             'decor' : load_images('tiles/decor'),
             'grass' : load_images('tiles/grass'),
-            'large decor' : load_images('tiles/large_decor'),
+            'large_decor' : load_images('tiles/large_decor'),
             'stone' : load_images('tiles/stone'),
             'player' : load_image('entities/player.png'),
             'background' : load_image('background.png'),
@@ -42,6 +42,8 @@ class Game:
         self.tilemap = Tilemap(self, tile_size=16)
 
         self.scroll = [0, 0]
+
+        self.tilemap.load('map.json')
 
     def run(self):
         while True:

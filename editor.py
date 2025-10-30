@@ -97,7 +97,7 @@ class Editor:
                     if event.button == 1:
                         self.clicking = True
                         if not self.ongrid: #[2:50:00]
-                            self.tilemap.offgrid_tiles.append({'type': self.tile_list[self.tile_group], 'variant': self.tile_variant, 'pos': (mpos[0] - self.scroll[0], mpos[1] + self.scroll[1])})
+                            self.tilemap.offgrid_tiles.append({'type': self.tile_list[self.tile_group], 'variant': self.tile_variant, 'pos': (mpos[0] + self.scroll[0], mpos[1] + self.scroll[1])})
                     if event.button == 3:
                         self.right_clicking = True
                     if self.shift:
@@ -128,6 +128,8 @@ class Editor:
                         self.movement[3] = True
                     if event.key == pygame.K_o:
                         self.tilemap.save('map.json')
+                    if event.key == pygame.K_t:
+                        self.tilemap.autotile()
 
                     if event.key == pygame.K_LSHIFT:
                         self.shift = True
