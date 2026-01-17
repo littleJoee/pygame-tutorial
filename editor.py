@@ -21,7 +21,8 @@ class Editor:
             'decor' : load_images('tiles/decor'),
             'grass' : load_images('tiles/grass'),
             'large_decor' : load_images('tiles/large_decor'),
-            'stone' : load_images('tiles/stone')
+            'stone' : load_images('tiles/stone'),
+            'spawners': load_images('tiles/spawners')
            }
         
         self.movement = [False, False, False, False]
@@ -100,11 +101,11 @@ class Editor:
                             self.tilemap.offgrid_tiles.append({'type': self.tile_list[self.tile_group], 'variant': self.tile_variant, 'pos': (mpos[0] + self.scroll[0], mpos[1] + self.scroll[1])})
                     if event.button == 3:
                         self.right_clicking = True
-                    if self.shift:
+                    if self.shift: # not properly implemented: to be fixed
                         if event.button == 4:
-                            self.tile_variant = (self.tile_group - 1) % len(self.assets[self.tile_list[self.tile_group[self.tile_variant]]])
+                            self.tile_variant = (self.tile_group - 1) % len(self.assets[self.tile_list[self.tile_group]])
                         if event.button == 5:
-                            self.tile_variant = (self.tile_group + 1) % len(self.assets[self.tile_list[self.tile_group[self.tile_variant]]])
+                            self.tile_variant = (self.tile_group + 1) % len(self.assets[self.tile_list[self.tile_group]])
                     else:
                         if event.button == 4:
                             self.tile_group = (self.tile_group - 1) % len(self.tile_list)
