@@ -9,6 +9,7 @@ from scripts.entity import PhysicsEntity, Player, Enemy
 from scripts.tilemap import Tilemap
 from scripts.clouds import Clouds
 from scripts.particle import Particle
+from scripts.spark import Spark
 
 class Game:
     def __init__(self):
@@ -50,7 +51,10 @@ class Game:
 
         self.tilemap = Tilemap(self, tile_size=16)
 
-        self.tilemap.load('map.json')
+        self.load_level(0)
+
+    def load_level(self, map_id):
+        self.tilemap.load('data/maps/' + str(map_id) + '.json')
 
         self.leaf_spawners = []
         for tree in self.tilemap.extract([('large_decor', 2)], keep=True):
@@ -65,14 +69,19 @@ class Game:
 
         self.particles = []
         self.projectiles = []
-
+        self.sparks = [] # potato original
 
         self.scroll = [0, 0]
-
+        self.dead = 0
 
     def run(self):
         while True:
             self.display.blit(self.assets['background'], (0, 0))
+
+            if self.dead:
+                self.dead += 1
+            if self.dead > 40:
+                self.load_level(0)
 
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30 
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
@@ -90,11 +99,13 @@ class Game:
             self.tilemap.render(self.display, offset=render_scroll)
 
             for enemy in self.enemies.copy():
-                enemy.update(self.tilemap, (0, 0))
+                kill = enemy.update(self.tilemap, (0, 0))
                 enemy.render(self.display, offset=render_scroll)
-
-            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display, offset=render_scroll)
+                if kill:
+                    self.enemies.remove(enemy)
+            if not self.dead:
+                self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
+                self.player.render(self.display, offset=render_scroll)
 
             # gun projectiles; [[x, y], direciton, timer]
             for projectile in self.projectiles.copy():
@@ -104,11 +115,27 @@ class Game:
                 self.display.blit(img, (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1]))
                 if self.tilemap.solid_check(projectile[0]):
                     self.projectiles.remove(projectile)
+                    for i in range(4):
+                        self.sparks.append(Spark(projectile[0], random.random() - 0.5 + (math.pi if projectile[1] > 0 else 0), 2 + random.random()))
                 elif projectile[2] > 360:
                     self.projectiles.remove(projectile)
                 elif abs(self.player.dashing) < 50: # incincible [4:36:00]
                     if self.player.rect().collidepoint(projectile[0]):
                         self.projectiles.remove(projectile)
+                        self.dead += 1
+                        # player hit sparks
+                        for i in range(30):
+                            angle = random.random() * math.pi * 2
+                            speed = random.random() * 5
+                            self.sparks.append(Spark(self.player.rect().center, angle, 2 + random.random()))
+                            self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle + math.pi) * speed * 0.5], frame=random.randint(0, 7)))
+
+            # potato original for visual effects - self managing
+            for spark in self.sparks.copy():
+                kill = spark.update()
+                spark.render(self.display, offset=render_scroll)
+                if kill:
+                    self.sparks.remove(spark)
 
             # manages particles 
             for particle in self.particles.copy():
