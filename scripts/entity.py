@@ -115,6 +115,7 @@ class Enemy(PhysicsEntity):
         # kill enemy
         if abs(self.game.player.dashing) >= 50:
             if self.rect().colliderect(self.game.player.rect()):
+                self.game.screenshake = max(16, self.game.screenshake)
                 # player kill sparks but for enemy
                 for i in range(30):
                     angle = random.random() * math.pi * 2
@@ -145,6 +146,13 @@ class Player(PhysicsEntity):
         super().update(tilemap, movement=movement)
 
         self.air_time += 1
+
+        # if you fall for more than 2 seconds
+        if self.air_time > 120:
+            if not self.game.dead:
+                self.game.screenshake = max(16, self.game.screenshake)
+            self.game.dead += 1
+
         if self.collisions['down']:
             self.air_time = 0
             self.jumps = 2
